@@ -1,0 +1,5 @@
+tensorflow
+opencv-python
+pywin32
+mss
+keras

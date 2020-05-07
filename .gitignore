@@ -1,3 +1,10 @@
+# Models / training data
+*.model
+data/
+
+# vscode
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -105,6 +112,7 @@ celerybeat.pid
 .env
 .venv
 env/
+env-gpu/
 venv/
 ENV/
 env.bak/
