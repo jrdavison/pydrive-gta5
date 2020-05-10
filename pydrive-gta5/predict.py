@@ -1,10 +1,5 @@
 import os
 import time
-"""
-Prediction while game is running on GPU will cause an error.
-This ensures tensorflow runs on CPU
-"""
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 import numpy as np
 from keras.models import load_model
@@ -14,7 +9,7 @@ from screen import record_screen
 from settings import _MODEL_NAME, _HEIGHT, _WIDTH
 
 
-turn_thresh = .75
+turn_thresh = 0.80
 fwd_thresh = 0.70
 debug = True
 
@@ -43,12 +38,17 @@ def predict():
         if "T" in keys.check():
             if paused:
                 paused = False
+                print("Resuming...")
                 time.sleep(1)
             else:
                 paused = True
                 execute_input([0, 0, 0])
+                print("Paused")
                 time.sleep(1)
-
+        elif "Q" in keys.check():
+            execute_input([0, 0, 0])
+            print("Exiting...")
+            break
 
 
 

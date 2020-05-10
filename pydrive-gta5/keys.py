@@ -96,6 +96,7 @@ def execute_input(moves):
         press_key(W)
         release_key(A)
         release_key(D)
+        time.sleep(t_time)
     elif moves == [0,0,1]: # right
         press_key(W)
         press_key(D)
