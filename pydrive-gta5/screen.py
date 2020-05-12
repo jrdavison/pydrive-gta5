@@ -9,9 +9,10 @@ def record_screen(resize=None, region=None):
         region = win32gui.GetWindowRect(win32gui.GetForegroundWindow())
 
     left, top, x2, y2 = region
-    height = y2 - top + 1
-    width = x2 - left + 1
-    bbox = {'top': top, 'left': left, 'width': width, 'height': height}
+    top += 40  # remove the window title bar from the image
+    height = y2 - top
+    width = x2 - left
+    bbox = {"top": top, "left": left, "width": width, "height": height}
 
     screenshot = mss()
     while 1:
@@ -23,8 +24,16 @@ def record_screen(resize=None, region=None):
 
 
 if __name__ == '__main__':
-    for frame in record_screen((800, 640)):
-        cv2.imshow('screen', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+    import time
+    from settings import _WIDTH, _HEIGHT
+
+    print("Starting in...")
+    for i in range(4)[::-1]:
+        print(i + 1)
+        time.sleep(1)
+
+    for frame in record_screen((_WIDTH, _HEIGHT)):
+        cv2.imshow("screen", frame)
+        if cv2.waitKey(1) & 0xFF == ord("q"):
             cv2.destroyAllWindows()
             break
