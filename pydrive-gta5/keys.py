@@ -60,17 +60,36 @@ class Keys:
         return keys
 
     def keys_to_onehot(self, keys):
-        output = [0, 0, 0]
-        if 'A' in keys:
-            output[0] = 1
-        elif 'D' in keys:
-            output[2] = 1
-        else:
-            output[1] = 1
+        output = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        one_index = None
+
+        if "W" in keys and "A" in keys:     # WA
+            one_index = 0
+        elif "W" in keys and "D" in keys:   # WD
+            one_index = 1
+        elif "S" in keys and "A" in keys:   # SA
+            one_index = 2
+        elif "S" in keys and "D" in keys:   # SD
+            one_index = 3
+        elif "W" in keys:                   # W
+            one_index = 4
+        elif "S" in keys:                   # S
+            one_index = 5
+        elif "A" in keys:                   # A
+            one_index = 6
+        elif "D" in keys:                   # D
+            one_index = 7
+        else:                               # NO KEY PRESSED
+            one_index = 8
+
+        if one_index is not None:
+            output[one_index] = 1
+
         return output
 
 
-def execute_input(moves):
+
+def execute_input(move_index=-1):
     def press_key(hex_code):
         extra = ctypes.c_ulong(0)
         ii_ = Input_I()
@@ -85,25 +104,56 @@ def execute_input(moves):
         x = Input(ctypes.c_ulong(1), ii_)
         ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
 
-
-    if moves == [1,0,0]: # left
+    if move_index == 0:     # WA
+        release_key(S)
+        release_key(D)
         press_key(W)
         press_key(A)
-        release_key(D)
         time.sleep(t_time)
+    elif move_index == 1:   # WD
         release_key(A)
-    elif moves == [0,1,0]: # straight
-        press_key(W)
-        release_key(A)
-        release_key(D)
-        time.sleep(t_time)
-    elif moves == [0,0,1]: # right
+        release_key(S)
         press_key(W)
         press_key(D)
-        release_key(A)
         time.sleep(t_time)
+    elif move_index == 2:   # SA
+        release_key(W)
         release_key(D)
-    elif moves == [0, 0, 0]:
+        press_key(S)
+        press_key(A)
+        time.sleep(t_time)
+    elif move_index == 3:   # SD
         release_key(W)
         release_key(A)
+        press_key(S)
+        press_key(D)
+        time.sleep(t_time)
+    elif move_index == 4:   # W
+        release_key(A)
+        release_key(S)
+        release_key(D)
+        press_key(W)
+        time.sleep(t_time)
+    elif move_index == 5:   # S
+        release_key(W)
+        release_key(A)
+        release_key(D)
+        press_key(S)
+        time.sleep(t_time)
+    elif move_index == 6:   # A
+        release_key(W)
+        release_key(S)
+        release_key(D)
+        press_key(A)
+        time.sleep(t_time)
+    elif move_index == 7:   # D
+        release_key(W)
+        release_key(A)
+        release_key(S)
+        press_key(D)
+        time.sleep(t_time)
+    else:                   # NO KEY PRESSED
+        release_key(W)
+        release_key(A)
+        release_key(S)
         release_key(D)

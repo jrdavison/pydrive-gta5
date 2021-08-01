@@ -32,8 +32,9 @@ if __name__ == '__main__':
         print(i + 1)
         time.sleep(1)
 
-    for frame in record_screen((_WIDTH, _HEIGHT)):
+    for frame in record_screen(resize=(_WIDTH, _HEIGHT)):
         cv2.imshow("screen", frame)
+
         if cv2.waitKey(1) & 0xFF == ord("q"):
             cv2.destroyAllWindows()
             break

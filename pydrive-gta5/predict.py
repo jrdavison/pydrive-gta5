@@ -2,38 +2,37 @@ import os
 import time
 
 import numpy as np
-from keras.models import load_model
 
+from models.inceptionv3 import ModifiedInception
 from keys import Keys, execute_input
 from screen import record_screen
-from settings import _MODEL_NAME, _HEIGHT, _WIDTH
+from settings import _HEIGHT, _WIDTH
 
 
-turn_thresh = 0.80
-fwd_thresh = 0.70
 debug = True
 
 def predict():
     keys = Keys()
-    model = load_model(_MODEL_NAME)
+    model = ModifiedInception(load=True, model_path="pydrive-model-v1.h5")
     paused = False
-    for frame in record_screen(resize=(_HEIGHT, _WIDTH)):
+    for frame in record_screen(resize=(_WIDTH, _HEIGHT)):
         if not paused:
             np_frame = np.array([frame])
             prediction = model.predict(np_frame)[0]
-
             if debug:
                 print(prediction)
 
-            move = [0, 1, 0]
-            if prediction[1] > fwd_thresh:
-                move = [0, 1, 0]
-            elif prediction[0] > turn_thresh:
-                move = [1, 0, 0]
-            elif prediction[2] > turn_thresh:
-                move = [0, 0, 1]
+            confident = False
+            for p in prediction:
+                if p >= 0.1:
+                    confident = True
+                    break
 
-            execute_input(move)
+            if confident:
+                move_index = np.argmax(prediction)
+                execute_input(move_index)
+            else:
+                execute_input()
 
         if "T" in keys.check():
             if paused:
@@ -42,11 +41,11 @@ def predict():
                 time.sleep(1)
             else:
                 paused = True
-                execute_input([0, 0, 0])
+                execute_input() # release all keys
                 print("Paused")
                 time.sleep(1)
         elif "Q" in keys.check():
-            execute_input([0, 0, 0])
+            execute_input() # release all keys
             print("Exiting...")
             break
 

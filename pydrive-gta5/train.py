@@ -1,34 +1,37 @@
-from keras.applications.inception_v3 import InceptionV3
-from keras.preprocessing import image
-from keras.models import Model
-from keras.layers import Dense, GlobalAveragePooling2D, Input
-from keras import backend as K
-from keras.optimizers import SGD
+import os
+
 import numpy as np
 
-from settings import _EPOCHS, _HEIGHT, _WIDTH, _NP_DATA_NORM, _MODEL_NAME
+from models.inceptionv3 import ModifiedInception
+from settings import _HEIGHT, _WIDTH
 
 
-train_data = list(np.load(_NP_DATA_NORM, allow_pickle=True))
-for i in range(5, 6):
-    train_data += list(np.load("data/training_data_v{}_normal.npy".format(i), allow_pickle=True))
+CLASSES = 9
+EPOCHS = 5
 
-X = np.array([i[0] for i in train_data])
-Y = [i[1] for i in train_data]
 
-# create the base pre-trained model
-base_model = InceptionV3(weights='imagenet', include_top=False)
+def main():
+    model = ModifiedInception(_HEIGHT, _WIDTH, channels=3, n_classes=9)
+    iteration = 1
+    X, Y = [], []
+    for subdir, _, files in os.walk("./data"):
+        for file in files:
+            full_path = os.path.join(subdir, file)
+            print("loading: ", full_path)
+            train_data = np.load(full_path, allow_pickle=True)
 
-# global spatial average pooling layer
-x = base_model.output
-x = GlobalAveragePooling2D()(x)
-# fully-connected layer
-x = Dense(1024, activation='relu')(x)
-# logistic layer
-predictions = Dense(3, activation='softmax')(x)
+            np.random.shuffle(train_data)
+            for x, y in train_data:
+                X.append(x)
+                Y.append(y)
+            assert len(X) == len(Y)
+            if len(X) >= 20000:
+                X = np.array(X)
+                Y = np.array(Y)
+                model.train(X, Y, batch_size=16, epochs=EPOCHS, validation_split=0.08)
+                #model.save("inceptionv3-iter{}.h5".format(iteration))
+                X, Y = [], []
+                iteration += 1
 
-model = Model(inputs=base_model.input, outputs=predictions)
-model.compile(optimizer=SGD(lr=0.0001, momentum=0.9),loss='categorical_crossentropy', metrics=['accuracy'])
-
-model.fit([X], [Y], epochs=_EPOCHS, validation_split=0.1)
-model.save(_MODEL_NAME)
+if __name__ == "__main__":
+    main()
